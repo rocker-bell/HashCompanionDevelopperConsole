@@ -7,6 +7,7 @@ import AppList from "./Components/AppList";
 import AppForm from "./Components/AppForm";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import HashCompanionDeveloperConsoleLanding from "./Components/DeveloperConsoleLandingPage";
 import {
   loadAccounts,
   saveAccounts,
@@ -135,6 +136,9 @@ const handleAddApp = async () => {
       <>
       <ToastContainer position="top-right" />
       <Routes>
+
+        <Route path="/" element={<HashCompanionDeveloperConsoleLanding/>} />
+
         <Route path="/Console" 
         
         
