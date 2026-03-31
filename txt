@@ -1,0 +1,4 @@
+contract_id = https://hashscan.io/testnet/contract/0.0.8454022/source
+
+
+APPFORM - full form as in the contract
