@@ -22,7 +22,7 @@ import { toast } from "react-toastify";
 //    evmAddress: string | null;
 //   setAccountId: React.Dispatch<React.SetStateAction<string | null>>;
 //   setPrivateKey: React.Dispatch<React.SetStateAction<string | null>>;
-//   setEvmAddress: React.Dispatch<React.SetStateAction<string | null>>; // ✅ add this
+//   setEvmAddress: React.Dispatch<React.SetStateAction<string | null>>; //
 
   
 // }

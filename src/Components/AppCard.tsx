@@ -1,22 +1,3 @@
-// import React from "react";
-
-// interface AppCardProps {
-//   app: { title: string; description: string; id: number };
-//   handleRemoveApp: (appId: number) => void;
-// }
-
-// const AppCard = ({ app, handleRemoveApp }: AppCardProps) => {
-//   return (
-//     <div className="app-card">
-//       <h3>{app.title}</h3>
-//       <p>{app.description}</p>
-//       <button onClick={() => handleRemoveApp(app.id)}>Remove App</button>
-//     </div>
-//   );
-// };
-
-// export default AppCard;
-
 import "../Styles/AppCard.css"
 import React from "react";
 
