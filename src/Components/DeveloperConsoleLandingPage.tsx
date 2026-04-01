@@ -52,7 +52,7 @@ const HashCompanionDeveloperConsoleLanding = () => {
         <div className="welcome-section">
           <h2>Welcome to HashCompanion Developer Console</h2>
           <p className="welcome-text">
-            Connect your Hedera wallet to start managing your apps and interacting with the Hedera Testnet.
+            Connect your Hedera wallet to start managing your apps and interacting with HashCompanionStore Developer Console.
           </p>
         </div>
 
