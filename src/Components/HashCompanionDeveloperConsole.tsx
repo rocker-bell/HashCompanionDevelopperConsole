@@ -1,31 +1,8 @@
 import { useState, useEffect } from "react";
 import "../Styles/HashCompanionDeveloperConsole.css";
-import {
-  Client,
-  AccountBalanceQuery,
-  PrivateKey,
-  AccountId,
- 
-  
-} from "@hashgraph/sdk";
+import { Client, AccountBalanceQuery, PrivateKey, AccountId } from "@hashgraph/sdk";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-// import "../Styles/ConnectWallet.css";
-// import TODOLISTABI from "./TODOLISTABI.ts";
-// import todoapp_icon from "../assets/todoapp_icon.png";
-
-// type Status = "Active" | "Completed" | "Expired";
-
-// interface ConnectWalletProps {
-//   accountId: string | null;
-//   privateKey: string | null;
-//    evmAddress: string | null;
-//   setAccountId: React.Dispatch<React.SetStateAction<string | null>>;
-//   setPrivateKey: React.Dispatch<React.SetStateAction<string | null>>;
-//   setEvmAddress: React.Dispatch<React.SetStateAction<string | null>>; //
-
-  
-// }
 
 interface HashCompanionDeveloperConsoleProps {
   accountId: string | null;
@@ -34,9 +11,9 @@ interface HashCompanionDeveloperConsoleProps {
   setAccountId: React.Dispatch<React.SetStateAction<string | null>>;
   setPrivateKey: React.Dispatch<React.SetStateAction<string | null>>;
   setEvmAddress: React.Dispatch<React.SetStateAction<string | null>>;
-  accounts: { accountId: string; privateKey: string; evmAddress: string }[]; // type accounts
-  activeAccount: number | null; // index of active wallet
-  autoConnect: boolean; // ✅ new
+  accounts: { accountId: string; privateKey: string; evmAddress: string }[];
+  activeAccount: number | null;
+  autoConnect: boolean;
   setAutoConnect: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -47,23 +24,23 @@ const HashCompanionDeveloperConsole: React.FC<HashCompanionDeveloperConsoleProps
   setAccountId,
   setPrivateKey,
   setEvmAddress,
-    accounts,
+  accounts,
   activeAccount,
   autoConnect,
-  setAutoConnect
+  setAutoConnect,
 }) => {
+  // -------------------- State --------------------
   const [balance, setBalance] = useState("");
   const [loading, setLoading] = useState(false);
-  // const [evmAddress, setEvmAddress] = useState("");
- 
-const [hasConnected, setHasConnected] = useState(false);
+  const [isActiveConnectModal, setisActiveConnectModal] = useState(false);
+  const [hasConnected, setHasConnected] = useState(false);
+  const [ProfileActive, setProfileActive] = useState(false);
+  const [copied, setCopied] = useState<"accountId" | "privateKey" | "evmAddress" | "">("");
+
   const navigate = useNavigate();
 
-  // const CONTRACT_ID = "0.0.8028090";
-
-  const saveAccountId = (id: string) =>
-    localStorage.setItem("hedera_account_id", id);
-
+  // -------------------- Helpers --------------------
+  const saveAccountId = (id: string) => localStorage.setItem("hedera_account_id", id);
   const clearAccountId = () => {
     localStorage.removeItem("hedera_account_id");
     setAccountId(null);
@@ -72,7 +49,6 @@ const [hasConnected, setHasConnected] = useState(false);
     setEvmAddress("");
     navigate("/");
   };
-
   const getEvmAddressFromAccountId = (id: string): string => {
     try {
       const parsed = AccountId.fromString(id);
@@ -82,12 +58,19 @@ const [hasConnected, setHasConnected] = useState(false);
       return "";
     }
   };
+  const maskAccountId = (id: string) => (!id ? "" : `${id.slice(0, 8)}...${id.slice(-4)}`);
+  const maskPrivateKey = (key: string) => (!key ? "" : `${key.slice(0, 8)}...${key.slice(-4)}`);
+  const maskEvmAddress = (address: string) => (!address ? "" : `${address.slice(0, 6)}...${address.slice(-4)}`);
+  const copyToClipboard = async (text: string, field: "accountId" | "privateKey" | "evmAddress") => {
+    await navigator.clipboard.writeText(text);
+    setCopied(field);
+    setTimeout(() => setCopied(""), 2000);
+  };
 
-  // -------------------- Connect Hedera account --------------------
+  // -------------------- Connect / Disconnect --------------------
   const connectAccount = async () => {
     try {
       setLoading(true);
-
       if (!accountId || !privateKey) {
         toast.error("Please enter both Account ID and Private Key");
         return;
@@ -96,27 +79,16 @@ const [hasConnected, setHasConnected] = useState(false);
       const parsedAccountId = AccountId.fromString(accountId.trim());
       const parsedPrivateKey = PrivateKey.fromStringECDSA(privateKey);
 
-      const client =
-        import.meta.env.VITE_NETWORK === "mainnet"
-          ? Client.forMainnet()
-          : Client.forTestnet();
-
+      const client = import.meta.env.VITE_NETWORK === "mainnet" ? Client.forMainnet() : Client.forTestnet();
       client.setOperator(parsedAccountId, parsedPrivateKey);
 
-      const balanceQuery = new AccountBalanceQuery().setAccountId(
-        parsedAccountId
-      );
-      const accountBalance = await balanceQuery.execute(client);
-
+      const accountBalance = await new AccountBalanceQuery().setAccountId(parsedAccountId).execute(client);
       setBalance(accountBalance.hbars.toString());
       saveAccountId(accountId);
       setHasConnected(true);
 
       const evm = getEvmAddressFromAccountId(accountId);
       setEvmAddress(evm);
-
-      // ✅ Fetch all todos on login
-      // fetchTodos(client);
     } catch (err) {
       console.error(err);
       toast.error("Invalid Account ID or Private Key");
@@ -131,17 +103,38 @@ const [hasConnected, setHasConnected] = useState(false);
     toast.error("Disconnected from account.");
   };
 
+
+  // type CopyField = "accountId" | "privateKey" | "evmAddress";
   
+
+
+
+  // -------------------- Effects --------------------
+  // Auto-connect
   useEffect(() => {
-  const intervalId = setInterval(() => {
-    const savedId = localStorage.getItem("hedera_account_id");
-    if (savedId && savedId !== accountId) setAccountId(savedId);
-    else if (!savedId && accountId && hasConnected) disconnect();
-  }, 3000);
+    if (autoConnect && accountId && privateKey && !hasConnected) {
+      connectAccount();
+      setAutoConnect(false);
+    }
+  }, [autoConnect, accountId, privateKey]);
 
-  return () => clearInterval(intervalId);
-}, [accountId, hasConnected]);
+  // Modal visibility logic
+  useEffect(() => {
+    const isConnected = accountId && privateKey && evmAddress;
+    setisActiveConnectModal(!isConnected);
+  }, [accountId, privateKey, evmAddress]);
 
+  // Persistent storage polling
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const savedId = localStorage.getItem("hedera_account_id");
+      if (savedId && savedId !== accountId) setAccountId(savedId);
+      else if (!savedId && accountId && hasConnected) disconnect();
+    }, 3000);
+    return () => clearInterval(intervalId);
+  }, [accountId, hasConnected]);
+
+  // Storage listener
   useEffect(() => {
     const onStorageChange = (e: StorageEvent) => {
       if (e.key === "hedera_account_id") setAccountId(e.newValue || null);
@@ -150,215 +143,156 @@ const [hasConnected, setHasConnected] = useState(false);
     return () => window.removeEventListener("storage", onStorageChange);
   }, []);
 
-  // -------------------- Balance polling --------------------
+  // Balance polling
   useEffect(() => {
     if (!accountId) return;
-
     const fetchBalance = async () => {
       try {
         setLoading(true);
         const parsedAccountId = AccountId.fromString(accountId);
-
-        const client =
-          import.meta.env.VITE_NETWORK === "mainnet"
-            ? Client.forMainnet()
-            : Client.forTestnet();
-
-        const balanceQuery = new AccountBalanceQuery().setAccountId(
-          parsedAccountId
-        );
-
-        const accountBalance = await balanceQuery.execute(client);
+        const client = import.meta.env.VITE_NETWORK === "mainnet" ? Client.forMainnet() : Client.forTestnet();
+        const accountBalance = await new AccountBalanceQuery().setAccountId(parsedAccountId).execute(client);
         setBalance(accountBalance.hbars.toString());
-      } catch (err) {
-        console.error(err);
+      } catch {
         setBalance("Error fetching balance");
       } finally {
         setLoading(false);
       }
     };
-
     fetchBalance();
     const intervalId = setInterval(fetchBalance, 5000);
     return () => clearInterval(intervalId);
   }, [accountId]);
 
+  // Set active account from accounts array
   useEffect(() => {
-  if (activeAccount !== null && accounts[activeAccount]) {
-    const acc = accounts[activeAccount];
-    setAccountId(acc.accountId);
-    setPrivateKey(acc.privateKey);
-    setEvmAddress(acc.evmAddress);
-  }
-}, [activeAccount, accounts]);
-
-  // -------------------- Masking helpers --------------------
-  const maskAccountId = (id: string) =>
-    !id ? "" : `${id.slice(0, 8)}...${id.slice(-4)}`;
-
-  const maskPrivateKey = (key: string) =>
-    !key ? "" : `${key.slice(0, 8)}...${key.slice(-4)}`;
-
-  const maskEvmAddress = (address: string) =>
-    !address ? "" : `${address.slice(0, 6)}...${address.slice(-4)}`;
-
-
-
-  
-
-  // const handleHCAIhelperLink = () => {
-  //   navigate("/HCAIhelper")
-  // }
-
-
-
-  type CopyField = "accountId" | "privateKey" | "evmAddress";
-
-const [copied, setCopied] = useState<CopyField | "">("");
-
-const copyToClipboard = async (text: string, field: CopyField) => {
-  await navigator.clipboard.writeText(text);
-  setCopied(field);
-
-  setTimeout(() => {
-    setCopied("");
-  }, 2000);
-};
-
-
-
-useEffect(() => {
-  if (autoConnect && accountId && privateKey && !hasConnected) {
-    connectAccount();
-    setAutoConnect(false); // reset flag
-  }
-}, [autoConnect, accountId, privateKey]);
+    if (activeAccount !== null && accounts[activeAccount]) {
+      const acc = accounts[activeAccount];
+      setAccountId(acc.accountId);
+      setPrivateKey(acc.privateKey);
+      setEvmAddress(acc.evmAddress);
+    }
+  }, [activeAccount, accounts]);
 
   // -------------------- Render --------------------
   return (
     <div className="container">
+      {/* Header */}
       <div className="header-container">
-       <Link to="/">
-            <img width="35" height="35" src="https://img.icons8.com/nolan/64/left.png" alt="left"/>
-      </Link>
-      <h2 className="header1">Connect Hedera Account</h2>
-      </div>
+        <Link to="/">
+          <img width="35" height="35" src="https://img.icons8.com/nolan/64/left.png" alt="left" />
+        </Link>
 
-      <input
-        type="text"
-        placeholder="Account ID (0.0.x)"
-        value={accountId ?? ""}
-        onChange={(e) => setAccountId(e.target.value.trim())}
-        className="input"
-      />
-
-      <input
-        type="password"
-        placeholder="Private Key"
-        value={privateKey ?? ""}
-        onChange={(e) => setPrivateKey(e.target.value.trim())}
-        className="input"
-      />
-
-      <div className="button-group">
-        <button
-          onClick={connectAccount}
-          disabled={loading}
-          className="btn"
-        >
-          {loading ? "Connecting..." : accountId ? "Connected" : "Connect"}
-        </button>
-
-        <button
-          onClick={disconnect}
-          disabled={!accountId}
-          className="btn disconnect"
-        >
-          Disconnect
-        </button>
-      </div>
-
-      {/* {accountId && (
-        <div className="info">
-          <p>
-            <strong>Account ID:</strong> {maskAccountId(accountId)}
-          </p>
-          <p>
-            <strong>Private Key:</strong> {maskPrivateKey(privateKey ?? "")}
-          </p>
-        </div>
-      )}
-
-      {balance && (
-        <p className="info">
-          <strong>Balance:</strong> {balance} HBAR
-        </p>
-      )}
-
-      {evmAddress && (
-        <p className="info">
-          <strong>EVM Address:</strong> {maskEvmAddress(evmAddress)}
-        </p>
-      )} */}
-
-      {accountId && (
-  <div className="info">
-    <div className="wallet-info-container">
-    <p className="container-paragraph">
-      <strong>Account ID:</strong> {maskAccountId(accountId)}
-      <button onClick={() => copyToClipboard(accountId ?? "", "accountId")}>
-        {copied === "accountId" ? "📋 Copied" : "📋"}
-      </button>
-    </p>
-    </div>
-        <div className="wallet-info-container">
-    <p className="container-paragraph">
-      <strong>Private Key:</strong> {maskPrivateKey(privateKey ?? "")}
-      <button onClick={() => copyToClipboard(privateKey ?? "", "privateKey")}>
-        {copied === "privateKey" ? "📋 Copied" : "📋"}
-      </button>
-    </p>
-    </div>
-  </div>
-)}
-
-      {balance && (
-        <p className="info">
-          <strong>Balance:</strong> {balance} HBAR
-        </p>
-      )}
-
-      {evmAddress && (
-        <p className="wallet-info-container info">
-          <strong>EVM Address:</strong> {maskEvmAddress(evmAddress)}
-          <button  onClick={() => copyToClipboard(evmAddress, "evmAddress")}>
-            
-            {copied === "evmAddress" ? "📋 Copied" : "📋"}
-          </button>
-        </p>
-      )}
-
-      <div className="apps-container">
-        {/* <span className="more-apps">
-          <Link to="/Myapps" className="Myapps-link">
-          more <img width="25" height="25" src="https://img.icons8.com/office/40/forward--v1.png" alt="forward--v1"/>
+        {/* Profile Dropdown */}
+        <div className="profile-dropdown" onMouseEnter={() => setProfileActive(true)} onMouseLeave={() => setProfileActive(false)}>
+          <Link to="#">
+            <img width="45" height="45" src="https://img.icons8.com/3d-fluency/94/user-male-circle.png" alt="user" />
           </Link>
-        </span> */}
-        <div className="general-appbox">
-          
-        
 
+          <div className={`ConnectedAccount-info ${ProfileActive ? "show" : ""}`}>
+            {/* {accountId && (
+              <div className="info">
+                <div className="wallet-info-container">
+                  <p>
+                    <strong>Account ID:</strong> {maskAccountId(accountId)}
+                  </p>
+                </div>
+                <div className="wallet-info-container">
+                  <p>
+                    <strong>Private Key:</strong> {maskPrivateKey(privateKey ?? "")}
+                  </p>
+                </div>
+                {evmAddress && (
+                  <div className="wallet-info-container">
+                    <p>
+                      <strong>EVM Address:</strong> {maskEvmAddress(evmAddress)}
+                    </p>
+                  </div>
+                )}
+                {balance && (
+                  <p>
+                    <strong>Balance:</strong> {balance} HBAR
+                  </p>
+                )}
+              </div>
+            )} */}
 
+            {accountId && (
+          <div className="info">
+            <div className="wallet-info-container">
+            <p className="container-paragraph">
+              <strong>Account ID:</strong> {maskAccountId(accountId)}
+              <button onClick={() => copyToClipboard(accountId ?? "", "accountId")}>
+                {copied === "accountId" ? "📋 Copied" : "📋"}
+              </button>
+            </p>
+            </div>
+                <div className="wallet-info-container">
+            <p className="container-paragraph">
+              <strong>Private Key:</strong> {maskPrivateKey(privateKey ?? "")}
+              <button onClick={() => copyToClipboard(privateKey ?? "", "privateKey")}>
+                {copied === "privateKey" ? "📋 Copied" : "📋"}
+              </button>
+            </p>
+            </div>
+          </div>
+        )}
 
-      
+              {balance && (
+                <p className="info">
+                  <strong>Balance:</strong> {balance} HBAR
+                </p>
+              )}
+
+              {evmAddress && (
+                <p className="wallet-info-container info">
+                  <strong>EVM Address:</strong> {maskEvmAddress(evmAddress)}
+                  <button  onClick={() => copyToClipboard(evmAddress, "evmAddress")}>
+                    
+                    {copied === "evmAddress" ? "📋 Copied" : "📋"}
+                  </button>
+                </p>
+              )}
+          </div>
         </div>
-        
+      </div>
+
+      {/* Connect Account Modal */}
+      {isActiveConnectModal && (
+        <div className="ConnectAccount_elements Active">
+          <h1>Connect your Hedera Account</h1>
+          <input
+            type="text"
+            placeholder="Account ID (0.0.x)"
+            value={accountId ?? ""}
+            onChange={(e) => setAccountId(e.target.value.trim())}
+            className="input"
+          />
+          <input
+            type="password"
+            placeholder="Private Key"
+            value={privateKey ?? ""}
+            onChange={(e) => setPrivateKey(e.target.value.trim())}
+            className="input"
+          />
+          <div className="button-group">
+            <button onClick={connectAccount} disabled={loading} className="btn">
+              {loading ? "Connecting..." : accountId ? "Connected" : "Connect"}
+            </button>
+            <button onClick={disconnect} disabled={!accountId} className="btn disconnect">
+              Disconnect
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Apps Container */}
+      <div className="apps-container">
+        <div className="general-appbox">{/* App content here */}</div>
       </div>
     </div>
   );
 };
 
 export default HashCompanionDeveloperConsole;
-
-
 
