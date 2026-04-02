@@ -3,7 +3,7 @@
   position: relative;
   width: 100%;
   min-height: 100%;
-  padding: 10px 10px;
+  /* padding: 10px 10px; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,7 +32,7 @@
   align-items: center;
 }
 
-.ConnectedAccount-info {
+/* .ConnectedAccount-info {
   position: absolute;
   top: 60px;
   right: 0;
@@ -49,19 +49,73 @@
   display: flex;
   transform: translateY(0);
   border: 1px solid black;
-  background-color: red;
+  background: linear-gradient(to bottom, #f5f5ff, #e8e0f8);
   flex-direction: column;
   justify-content: center;
   align-items: center;
   min-width: 300px;
   max-width: 300px;
+  min-height: 400px;
+  gap: 10px;
+} */
+
+
+/* Default hidden state */
+.ConnectedAccount-info {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease; /* smooth fade + slide */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 300px;
+  max-width: 300px;
+  min-height: 400px;
+  gap: 10px;
+  z-index: 1000; /* ensure it's clickable */
 }
+
+/* Active state */
+.ConnectedAccount-info.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.info {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  
+}
+
+.wallet-info-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+
+  }
 
 /* ===================== Connect Modal ===================== */
 .ConnectAccount_elements {
   border: 1px dashed black;
   width: 100%;
   display: none;
+}
+
+.ConnectAccount_elements_title {
+  font-weight: bold;
+  color: #fff;
 }
 
 .ConnectAccount_elements.Active {
@@ -74,15 +128,17 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 9999;
+  background: linear-gradient(to bottom, #667eea, #764ba2);
+  background-size: 100% 200%;
+  animation: gradientWave 8s ease infinite;
+  /* backdrop-filter: blur(8px); */
+  /* -webkit-backdrop-filter: blur(8px); */
+  z-index: 1000;
 }
 
 .Connect_form {
-  width: 350px;
-  height: 459px;
+  width: 400px;
+  height: 500px;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -104,6 +160,12 @@
   padding: 5px;
   border-radius: 6px;
   cursor: pointer;
+  border: none;
+
+}
+
+.connect-btn:hover {
+  background: linear-gradient(to bottom, #f5f5ff, #e8e0f8);;
 }
 
 .disconnect {
@@ -151,18 +213,41 @@
 .utilities_sidebar {
   border: 1px solid black;
   width: 15%;
-  max-width: 100%;
-  min-height: 800px;
   
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  min-height: 800px;
+
+  
   gap: 10px;
+}
+
+
+.USidebar_slider {
+  list-style: none;
+  text-decoration: none;
+  /* min-width: 100%; */
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  background-color: aquamarine;
+}
+
+.USidebar_slider li {
+  min-width: 100%;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.USidebar_slider li.active {
+  background: #007bff;
+  color: white;
 }
 
 .sidebar_mainContent {
     border: 1px solid black;
   width: 80%;
-  max-width: 100%;
+  /* max-width: 100%; */
   min-height: 800px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -170,39 +255,10 @@
 
 }
 
-.app-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  cursor: pointer;
-  height: 100px;
+.Content_section {
+  padding: 15px;
 }
 
-.more-apps {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  text-align: end;
-}
-
-.app-image {
-  width: 35px;
-  height: 35px;
-}
-
-.app-title {
-  font-weight: bold;
-}
-
-.Myapps-link {
-  width: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  font-weight: bold;
-}
 
 /* ===================== Modal Backdrop (Optional) ===================== */
 .modal-backdrop {
@@ -228,4 +284,11 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+
+@keyframes gradientWave {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 0% 100%; }
+    100% { background-position: 0% 0%; }
 }
