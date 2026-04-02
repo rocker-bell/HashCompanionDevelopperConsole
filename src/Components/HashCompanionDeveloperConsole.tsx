@@ -3,6 +3,8 @@ import "../Styles/HashCompanionDeveloperConsole.css";
 import { Client, AccountBalanceQuery, PrivateKey, AccountId } from "@hashgraph/sdk";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import AddNew from "./AddNew.tsx";
+import Apps from "./Apps.tsx";
 
 interface HashCompanionDeveloperConsoleProps {
   accountId: string | null;
@@ -98,17 +100,7 @@ const HashCompanionDeveloperConsole: React.FC<HashCompanionDeveloperConsoleProps
     }
   };
 
-  // const disconnect = () => {
-  //   clearAccountId();
-  //   toast.error("Disconnected from account.");
-  // };
-
-//   const disconnect = () => {
-//   console.log("Disconnect clicked!");
-//   clearAccountId();
-//   toast.error("Disconnected from account.");
-// };
-
+ 
 const disconnect = () => {
   console.log("Disconnect triggered");
   clearAccountId(); // clears state and localStorage
@@ -138,15 +130,6 @@ const disconnect = () => {
     setisActiveConnectModal(!isConnected);
   }, [accountId, privateKey, evmAddress]);
 
-  // Persistent storage polling
-  // useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     const savedId = localStorage.getItem("hedera_account_id");
-  //     if (savedId && savedId !== accountId) setAccountId(savedId);
-  //     else if (!savedId && accountId && hasConnected) disconnect();
-  //   }, 3000);
-  //   return () => clearInterval(intervalId);
-  // }, [accountId, hasConnected]);
 
   useEffect(() => {
   const intervalId = setInterval(() => {
@@ -225,78 +208,12 @@ const handleMouseLeave = () => {
     <div className="container">
       {/* Header */}
       <div className="header-container">
-        <Link to="/">
+        {/* <Link to="/">
           <img width="35" height="35" src="https://img.icons8.com/nolan/64/left.png" alt="left" />
-        </Link>
+        </Link> */}
+        <h1>Welcome to HashCompanion developperConsole</h1>
 
-        {/* Profile Dropdown */}
-         {/* <div
-  className="profile-dropdown"
-  onMouseEnter={handleMouseEnter}
-  onMouseLeave={handleMouseLeave}
->
-  <Link to="#">
-    <img
-      width="45"
-      height="45"
-      src="https://img.icons8.com/3d-fluency/94/user-male-circle.png"
-      alt="user"
-    />
-  </Link>
-
-          <div className={`ConnectedAccount-info ${ProfileActive ? "show" : ""}`}>
-          
-            {accountId && (
-          <div className="info">
-            <div className="wallet-info-container">
-            <p className="container-paragraph">
-              <strong>Account ID:</strong> {maskAccountId(accountId)}
-            </p>
-              <button onClick={() => copyToClipboard(accountId ?? "", "accountId")}>
-                {copied === "accountId" ? "📋 Copied" : "📋"}
-              </button>
-            
-            </div>
-                <div className="wallet-info-container">
-            <p className="container-paragraph">
-              <strong>Private Key:</strong> {maskPrivateKey(privateKey ?? "")}
-            </p>
-              <button onClick={() => copyToClipboard(privateKey ?? "", "privateKey")}>
-                {copied === "privateKey" ? "📋 Copied" : "📋"}
-              </button>
-            
-            </div>
-
-            <div className="wallet-info-container">
-             <strong>evmAddress:</strong> {maskEvmAddress(evmAddress ?? "")}
-              <button onClick={() => copyToClipboard(evmAddress ?? "", "evmAddress")}>
-                {copied === "evmAddress" ? "📋 Copied" : "📋"}
-              </button>
-
-            </div>
-          </div>
-        )}
-
-              {balance && (
-                <p className="info">
-                  <strong>Balance:</strong> {balance} HBAR
-                </p>
-              )}
-
-           <div className="disconnect-container">
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      console.log("Disconnect clicked!"); // Debug
-      disconnect();
-    }}
-    className="btn disconnect"
-  >
-    Disconnect
-  </button>
-</div>
-          </div>
-        </div> */}
+      
 
         {/* Profile Dropdown */}
 <div
@@ -437,13 +354,28 @@ const handleMouseLeave = () => {
 
         {activeSideBar === "add" && (
           <div className="Content_section AddNewApp_section">
-            Add New App Content
+             <AddNew accountId={accountId} privateKey={privateKey} contractId="0.0.8454022" />
+
+
+
           </div>
         )}
 
         {activeSideBar === "apps" && (
           <div className="Content_section Apps_section">
-            Apps Content
+            {
+  !evmAddress || !accountId || !privateKey ? (
+    <p>No EVM address or wallet connected</p>
+  ) : (
+    <Apps
+      accountId={accountId}
+      privateKey={privateKey}
+      evmAddress={evmAddress}
+      contractId="0.0.8454022"
+      network="testnet"
+    />
+  )
+}
           </div>
         )}
 

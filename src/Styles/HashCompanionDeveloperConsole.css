@@ -68,7 +68,8 @@
   opacity: 0;
   visibility: hidden;
   transform: translateY(10px);
-  transition: opacity 0.3s ease, transform 0.3s ease; /* smooth fade + slide */
+  transition: opacity 0.3s ease, transform 0.3s ease; 
+   background: linear-gradient(to bottom, #f5f5ff, #e8e0f8);
   display: flex;
   flex-direction: column;
   justify-content: center;
