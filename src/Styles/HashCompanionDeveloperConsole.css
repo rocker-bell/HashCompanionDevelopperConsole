@@ -3,7 +3,7 @@
   position: relative;
   width: 100%;
   min-height: 100%;
-  padding: 5px;
+  padding: 10px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,6 +40,7 @@
   visibility: hidden;
   transform: translateY(10px);
   transition: all 0.3s ease;
+  padding: 15px 15px;
 }
 
 .ConnectedAccount-info.show {
@@ -77,6 +78,16 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 9999;
+}
+
+.Connect_form {
+  width: 350px;
+  height: 459px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+
 }
 
 /* ===================== Form Elements ===================== */
@@ -121,28 +132,42 @@
 }
 
 /* ===================== Apps Container ===================== */
-.apps-container {
+.developperbox-container {
   position: absolute;
   bottom: 10px;
-  width: 100%;
-  min-height: 70%;
-  max-height: 70%;
-  padding: 5px;
+  width: 95%;
+  min-height: 90%;
+  /* max-height: 70%; */
+  
+  padding: 10px;
   border: 1px dashed black;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  flex-direction: column;
+  flex-direction: row;
+  /* gap: 10px; */
 }
 
-.general-appbox {
+.utilities_sidebar {
   border: 1px solid black;
-  width: 100%;
+  width: 15%;
   max-width: 100%;
-  min-height: 600px;
+  min-height: 800px;
+  
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+}
+
+.sidebar_mainContent {
+    border: 1px solid black;
+  width: 80%;
+  max-width: 100%;
+  min-height: 800px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+
 }
 
 .app-box {

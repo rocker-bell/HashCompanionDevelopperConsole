@@ -253,6 +253,9 @@ const HashCompanionDeveloperConsole: React.FC<HashCompanionDeveloperConsoleProps
                   </button>
                 </p>
               )}
+                <button onClick={disconnect} disabled={!accountId} className="btn disconnect">
+              Disconnect
+            </button>
           </div>
         </div>
       </div>
@@ -260,6 +263,7 @@ const HashCompanionDeveloperConsole: React.FC<HashCompanionDeveloperConsoleProps
       {/* Connect Account Modal */}
       {isActiveConnectModal && (
         <div className="ConnectAccount_elements Active">
+          <div className="Connect_form">
           <h1>Connect your Hedera Account</h1>
           <input
             type="text"
@@ -279,16 +283,22 @@ const HashCompanionDeveloperConsole: React.FC<HashCompanionDeveloperConsoleProps
             <button onClick={connectAccount} disabled={loading} className="btn">
               {loading ? "Connecting..." : accountId ? "Connected" : "Connect"}
             </button>
-            <button onClick={disconnect} disabled={!accountId} className="btn disconnect">
-              Disconnect
-            </button>
+          
+          </div>
           </div>
         </div>
       )}
 
       {/* Apps Container */}
-      <div className="apps-container">
-        <div className="general-appbox">{/* App content here */}</div>
+      <div className="developperbox-container">
+        <div className="utilities_sidebar">
+
+        </div>
+
+        <div className="sidebar_mainContent">
+
+        </div>
+
       </div>
     </div>
   );
