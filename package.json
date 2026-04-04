@@ -13,10 +13,12 @@
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.81.0",
+    "@react-oauth/google": "^0.13.4",
     "@types/chrome": "^0.1.38",
     "dotenv": "^17.4.0",
     "ethers": "^6.16.0",
     "gh-pages": "^6.3.0",
+    "googleapis": "^171.4.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
