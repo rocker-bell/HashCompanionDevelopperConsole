@@ -1,3 +1,4 @@
+
 // src/Components/AddNew.tsx
 import React, { useState } from "react";
 import {
@@ -14,183 +15,152 @@ interface AddNewProps {
   contractId: string; // Hedera contract ID
 }
 
-const AddNew: React.FC<AddNewProps> = ({ accountId, privateKey, contractId}) => {
+
+import dotenv from 'dotenv';
+
+// Load .env variables
+dotenv.config();
+
+
+
+const CLOUDINARY_UPLOAD_PRESET = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'defaultPreset';
+const CLOUDINARY_CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || 'defaultCloudName';
+const CLOUDINARY_API = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+const AddNew: React.FC<AddNewProps> = ({ accountId, privateKey, contractId }) => {
   const [appName, setAppName] = useState<string>("");
   const [appDescription, setAppDescription] = useState<string>("");
   const [appType, setAppType] = useState<"Free" | "Paid" | "OpenSource" | "Beta">("Free");
+  const [appImage, setAppImage] = useState<File | null>(null);
+  const [appMetaData, setAppMetaData] = useState<string>("{}");
   const [loading, setLoading] = useState<boolean>(false);
 
-  // const handleAddApp = async () => {
-  //   if (!appName || !appDescription) {
-  //     alert("Please enter app name and description");
-  //     return;
-  //   }
+  // Upload image to Cloudinary
+  const handleImageUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("folder", "developer_console_apps"); // Folder in Cloudinary
 
-  //   if (!accountId || !privateKey) {
-  //     alert("You must connect your account first");
-  //     return;
-  //   }
+    try {
+      const res = await fetch(CLOUDINARY_API, { method: "POST", body: formData });
+      const data = await res.json();
 
-  //   setLoading(true);
+      if (!data.secure_url) {
+        console.error("Cloudinary error:", data);
+        throw new Error("Image upload failed");
+      }
 
-  //   try {
-  //     const client =
-  //       import.meta.env.VITE_NETWORK === "mainnet"
-  //         ? Client.forMainnet()
-  //         : Client.forTestnet();
+      return data.secure_url;
+    } catch (err) {
+      console.error("Upload error:", err);
+      return null;
+    }
+  };
 
-  //     client.setOperator(accountId, privateKey);
+  const handleAddApp = async () => {
+    if (!appName || !appDescription) {
+      alert("Please enter app name and description");
+      return;
+    }
 
-  //     // Map appType to Hedera enum (0 = Free, 1 = Paid, 2 = OpenSource, 3 = Beta)
-  //     const appTypeEnumMap: Record<typeof appType, number> = {
-  //       Free: 0,
-  //       Paid: 1,
-  //       OpenSource: 2,
-  //       Beta: 3,
-  //     };
+    if (!accountId || !privateKey) {
+      alert("You must connect your account first");
+      return;
+    }
 
-  //     const tx = new ContractExecuteTransaction()
-  //       .setContractId(ContractId.fromString(contractId))
-  //       .setGas(200_000)
-  //       .setFunction(
-  //         "addApp",
-  //         new ContractFunctionParameters()
-  //           .addString(appName)
-  //           .addString(appDescription)
-  //           .addString("") // appImage (placeholder)
-  //           .addUint8(0) // appStatus (PendingReview)
-  //           .addUint8(appTypeEnumMap[appType])
-  //           .addString("{}") // metadata placeholder
-  //       );
+    // Validate metadata JSON
+    try {
+      JSON.parse(appMetaData);
+    } catch {
+      alert("Metadata must be valid JSON");
+      return;
+    }
 
-  //     const response = await tx.execute(client);
-  //     const receipt = await response.getReceipt(client);
+    setLoading(true);
 
+    try {
+      let appImageUrl = "";
+      if (appImage) {
+        const url = await handleImageUpload(appImage);
+        if (!url) {
+          alert("Image upload failed. Check console for details.");
+          setLoading(false);
+          return;
+        }
+        appImageUrl = url;
+      }
 
-  //     const publishApp =  await new ContractExecuteTransaction()
-  // .setContractId(ContractId.fromString(contractId))
-  // .setGas(200_000)
-  // .setFunction(
-  //   "publishApp",
-  //   new ContractFunctionParameters().addUint256(1) // your appId
-  // )
-  // .execute(client);
+      const client =
+        import.meta.env.VITE_NETWORK === "mainnet"
+          ? Client.forMainnet()
+          : Client.forTestnet();
+      client.setOperator(accountId, privateKey);
 
-  // const tx1 = await publishApp.execute(client);
+      const appTypeEnumMap: Record<typeof appType, number> = {
+        Free: 0,
+        Paid: 1,
+        OpenSource: 2,
+        Beta: 3,
+      };
 
-    
-
-  //     if (receipt.status.toString() === "SUCCESS") {
-  //       alert(`App "${appName}" submitted successfully!`);
-  //       setAppName("");
-  //       setAppDescription("");
-  //       console.log("receipt", receipt);
-  //     } else {
-  //       alert("Failed to add app. Transaction not successful.");
-  //     }
-  //   } catch (err) {
-  //     console.error("Error adding app:", err);
-  //     alert("Failed to add app");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-const handleAddApp = async () => {
-  if (!appName || !appDescription) {
-    alert("Please enter app name and description");
-    return;
-  }
-
-  if (!accountId || !privateKey) {
-    alert("You must connect your account first");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    const client =
-      import.meta.env.VITE_NETWORK === "mainnet"
-        ? Client.forMainnet()
-        : Client.forTestnet();
-
-    client.setOperator(accountId, privateKey);
-
-    const appTypeEnumMap: Record<typeof appType, number> = {
-      Free: 0,
-      Paid: 1,
-      OpenSource: 2,
-      Beta: 3,
-    };
-
-    // 1️⃣ Add App
-    const tx = await new ContractExecuteTransaction()
-      .setContractId(ContractId.fromString(contractId))
-      .setGas(200_000)
-      .setFunction(
-        "addApp",
-        new ContractFunctionParameters()
-          .addString(appName)
-          .addString(appDescription)
-          .addString("") // appImage placeholder
-          .addUint8(0) // PendingReview
-          .addUint8(appTypeEnumMap[appType])
-          .addString("{}") // metadata
-      )
-      .execute(client);
-
-
+      // 1️⃣ Add App
+      const tx = await new ContractExecuteTransaction()
+        .setContractId(ContractId.fromString(contractId))
+        .setGas(500_000)
+        .setFunction(
+          "addApp",
+          new ContractFunctionParameters()
+            .addString(appName)
+            .addString(appDescription)
+            .addString(appImageUrl)
+            .addUint8(0) // PendingReview
+            .addUint8(appTypeEnumMap[appType])
+            .addString(appMetaData)
+        )
+        .execute(client);
 
       const record = await tx.getRecord(client);
-const logData = record.contractFunctionResult?.logs?.[0]?.data;
+      const logData = record.contractFunctionResult?.logs?.[0]?.data;
 
-if (!logData) {
-  throw new Error("No log data found. Unable to retrieve appId.");
-}
+      if (!logData) {
+        throw new Error("No log data found. Unable to retrieve appId.");
+      }
 
-const abiCoder = new AbiCoder();
-const decoded = abiCoder.decode(
-  ["uint256", "string", "address"],
-  logData
-);
+      const abiCoder = new AbiCoder();
+      const decoded = abiCoder.decode(["uint256", "string", "address"], logData);
+      const newAppId = Number(decoded[0]);
 
-// decoded[0] is now a bigint
-const newAppId = Number(decoded[0]); // safely convert to number
-// const appName = decoded[1];
-// const owner = decoded[2];
+      // 2️⃣ Publish App
+      const publishTx = await new ContractExecuteTransaction()
+        .setContractId(ContractId.fromString(contractId))
+        .setGas(200_000)
+        .setFunction("publishApp", new ContractFunctionParameters().addUint256(newAppId))
+        .execute(client);
 
+      const publishReceipt = await publishTx.getReceipt(client);
 
-
-    // 3️⃣ Publish App
-    const publishTx = await new ContractExecuteTransaction()
-      .setContractId(ContractId.fromString(contractId))
-      .setGas(200_000)
-      .setFunction(
-        "publishApp",
-        new ContractFunctionParameters().addUint256(newAppId)
-      )
-      .execute(client);
-
-    const publishReceipt = await publishTx.getReceipt(client);
-
-    if (publishReceipt.status.toString() === "SUCCESS") {
-      alert(`App "${appName}" published successfully!`);
-      setAppName("");
-      setAppDescription("");
-      
-    } else {
-      alert("Publish failed");
+      if (publishReceipt.status.toString() === "SUCCESS") {
+        alert(`App "${appName}" published successfully!`);
+        setAppName("");
+        setAppDescription("");
+        setAppImage(null);
+        setAppMetaData("{}");
+      } else {
+        alert("Publish failed");
+      }
+    } catch (err) {
+      console.error("Error adding or publishing app:", err);
+      alert("Failed to add or publish app");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Error adding or publishing app:", err);
-    alert("Failed to add or publish app");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   return (
     <div className="AddNewApp_section">
       <h2>Add New App</h2>
+
       <input
         type="text"
         placeholder="App Name"
@@ -198,12 +168,37 @@ const newAppId = Number(decoded[0]); // safely convert to number
         onChange={(e) => setAppName(e.target.value)}
         className="input"
       />
+
       <textarea
         placeholder="App Description"
         value={appDescription}
         onChange={(e) => setAppDescription(e.target.value)}
         className="textarea"
       />
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setAppImage(e.target.files ? e.target.files[0] : null)}
+        className="input"
+      />
+
+      {/* Image preview */}
+      {appImage && (
+        <img
+          src={URL.createObjectURL(appImage)}
+          alt="Preview"
+          style={{ width: "150px", borderRadius: "8px", margin: "10px 0" }}
+        />
+      )}
+
+      <textarea
+        placeholder="Metadata (JSON)"
+        value={appMetaData}
+        onChange={(e) => setAppMetaData(e.target.value)}
+        className="input"
+      />
+
       <select
         value={appType}
         onChange={(e) => setAppType(e.target.value as any)}
@@ -214,6 +209,7 @@ const newAppId = Number(decoded[0]); // safely convert to number
         <option value="OpenSource">Open Source</option>
         <option value="Beta">Beta</option>
       </select>
+
       <button onClick={handleAddApp} disabled={loading} className="btn connect-btn">
         {loading ? "Adding..." : "Add App"}
       </button>

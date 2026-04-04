@@ -1,3 +1,4 @@
+import "../Styles/Apps.css";
 interface AppsProps {
     accountId: string | null;
     privateKey: string | null;

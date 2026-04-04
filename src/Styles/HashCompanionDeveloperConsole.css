@@ -32,32 +32,7 @@
   align-items: center;
 }
 
-/* .ConnectedAccount-info {
-  position: absolute;
-  top: 60px;
-  right: 0;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-  padding: 15px 15px;
-}
 
-.ConnectedAccount-info.show {
-  opacity: 1;
-  visibility: visible;
-  display: flex;
-  transform: translateY(0);
-  border: 1px solid black;
-  background: linear-gradient(to bottom, #f5f5ff, #e8e0f8);
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-width: 300px;
-  max-width: 300px;
-  min-height: 400px;
-  gap: 10px;
-} */
 
 
 /* Default hidden state */
@@ -245,15 +220,27 @@
   color: white;
 }
 
-.sidebar_mainContent {
+/* .sidebar_mainContent {
     border: 1px solid black;
   width: 80%;
-  /* max-width: 100%; */
+  
   min-height: 800px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 
+} */
+
+.sidebar_mainContent {
+  border: 1px solid black;
+  width: 80%;
+  min-height: 800px;
+  max-height: 1000px; /* Set a max height */
+  overflow-y: auto; /* Allow scrolling if content overflows */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
 }
 
 .Content_section {
