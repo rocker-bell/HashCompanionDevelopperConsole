@@ -74,9 +74,11 @@ const HashCompanionDeveloperConsoleLanding = () => {
               <circle cx="10" cy="10" r="2" fill="currentColor"/>
             </svg>
             <span>
-              <Link to="/CreateAccount">
-                Create New Wallet
+              <strong>
+              <Link to="https://chromewebstore.google.com/detail/hashcompanion/jlmffipfjhmnknffhdhpaecelheonach?authuser=0&hl=en">
+                    create here!
               </Link>
+              </strong>
             </span>
           </button>
         </div>
