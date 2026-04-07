@@ -14,6 +14,7 @@ import {
   loadActiveAccount,
   saveActiveAccount
 } from "./utils/storage"
+import DriveManager from "./Components/GoogleDriveexp";
 function App() {
 
     // const navigate = useNavigate()
@@ -136,6 +137,8 @@ const handleAddApp = async () => {
       <>
       <ToastContainer position="top-right" />
       <Routes>
+
+        <Route path="Drive" element={<DriveManager/>}  />
 
         <Route path="/" element={<HashCompanionDeveloperConsoleLanding/>} />
 
