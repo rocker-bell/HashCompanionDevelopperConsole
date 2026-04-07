@@ -24,7 +24,7 @@ The **HashCompanion Development Console** is a platform that allows developers t
 
 ![Dashboard & AddApps](./src/assets/screen_1.png)
 
-![Dashboard & myApps](./src/assets/screen_3.png)
+![Dashboard & myApps](./src/assets/screen_2.png)
 
 
 
