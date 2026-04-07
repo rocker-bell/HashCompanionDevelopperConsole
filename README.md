@@ -20,11 +20,11 @@ The **HashCompanion Development Console** is a platform that allows developers t
 * [Contact](#contact)
 
 ## Preview
-[Landing](./src/assets/screen_3.png)
+![Landing](./src/assets/screen_3.png)
 
-[Dashboard & AddApps](./src/assets/screen_1.png)
+![Dashboard & AddApps](./src/assets/screen_1.png)
 
-[Dashboard & myApps](./src/assets/screen_3.png)
+![Dashboard & myApps](./src/assets/screen_3.png)
 
 
 
