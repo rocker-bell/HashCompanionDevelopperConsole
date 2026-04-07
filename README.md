@@ -196,6 +196,8 @@ HashCompanionDeveloperConsole
 * **TypeScript**: Type-safe JavaScript for better developer experience.
 * **Vite**: Fast build tool for React projects.
 * **React Toastify**: For notifications and error handling.
+* **Cloudinary**: For image upload and serve
+* **GoogleDrive/GoogleDriveWorkspace**: for Apps file Storage.
 
 
 
