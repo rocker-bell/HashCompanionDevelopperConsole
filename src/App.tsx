@@ -15,6 +15,7 @@ import {
   saveActiveAccount
 } from "./utils/storage"
 import DriveManager from "./Components/GoogleDriveexp";
+import FileUploader from "./Components/FileUploader";
 function App() {
 
     // const navigate = useNavigate()
@@ -139,6 +140,8 @@ const handleAddApp = async () => {
       <Routes>
 
         <Route path="Drive" element={<DriveManager/>}  />
+
+        <Route path="/fileUploader" element={<FileUploader/>}/>
 
         <Route path="/" element={<HashCompanionDeveloperConsoleLanding/>} />
 
