@@ -690,6 +690,7 @@ import {
 } from "@hashgraph/sdk";
 import { AbiCoder } from "ethers";
 import { generateFileMetadata } from "../utils/metadata.ts";
+import { getDropboxToken } from "../utils/DropBox.ts";
 
 interface AddNewProps {
   accountId: string | null;
@@ -700,7 +701,7 @@ interface AddNewProps {
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_APP_CLOUDINARY_UPLOAD_PRESET || 'defaultPreset';
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_APP_CLOUDINARY_CLOUD_NAME || 'defaultCloudName';
 const CLOUDINARY_API = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-const DROPBOX_ACCESS_TOKEN = import.meta.env.VITE_ACCESS_TOKEN;
+// const DROPBOX_ACCESS_TOKEN = import.meta.env.VITE_ACCESS_TOKEN;
 
 const AddNew: React.FC<AddNewProps> = ({ accountId, privateKey, contractId }) => {
   const [appName, setAppName] = useState<string>("");
@@ -746,32 +747,101 @@ const AddNew: React.FC<AddNewProps> = ({ accountId, privateKey, contractId }) =>
   };
 
   // 📦 Upload Dropbox (Fichier App) - Déclenché au clic sur Add App
-  const uploadToDropbox = async (file: File) => {
-    try {
-      const response = await fetch("https://content.dropboxapi.com/2/files/upload", {
+  // const uploadToDropbox = async (file: File) => {
+  //   try {
+  //     const response = await fetch("https://content.dropboxapi.com/2/files/upload", {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${DROPBOX_ACCESS_TOKEN}`,
+  //         "Content-Type": "application/octet-stream",
+  //         "Dropbox-API-Arg": JSON.stringify({
+  //           path: `/apps_files/${Date.now()}_${file.name}`,
+  //           mode: "add",
+  //           autorename: true,
+  //         }),
+  //       },
+  //       body: file,
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.error_summary || "Dropbox upload failed");
+  //     }
+  //     return true;
+  //   } catch (err) {
+  //     console.error("Dropbox error:", err);
+  //     return false;
+  //   }
+  // };
+
+
+
+//   const uploadToDropbox = async (file: File) => {
+//   try {
+//     const token = await getDropboxToken();
+
+//     const response = await fetch("https://content.dropboxapi.com/2/files/upload", {
+//       method: "POST",
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/octet-stream",
+//         "Dropbox-API-Arg": JSON.stringify({
+//           path: `/apps_files/${Date.now()}_${file.name}`,
+//           mode: "add",
+//           autorename: true,
+//         }),
+//       },
+//       body: file,
+//     });
+
+//     return response.ok;
+//   } catch (err) {
+//     console.error(err);
+//     return false;
+//   }
+// };
+
+
+const uploadToDropbox = async (file: File) => {
+  try {
+    if (!file) throw new Error("File is missing");
+
+    const token = await getDropboxToken();
+
+    const dropboxArg = {
+      path: `/apps_files/${Date.now()}_${file.name}`,
+      mode: "add",
+      autorename: true,
+    };
+
+    const response = await fetch(
+      "https://content.dropboxapi.com/2/files/upload",
+      {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${DROPBOX_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/octet-stream",
-          "Dropbox-API-Arg": JSON.stringify({
-            path: `/apps_files/${Date.now()}_${file.name}`,
-            mode: "add",
-            autorename: true,
-          }),
+          "Dropbox-API-Arg": JSON.stringify(dropboxArg),
         },
         body: file,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error_summary || "Dropbox upload failed");
       }
-      return true;
-    } catch (err) {
-      console.error("Dropbox error:", err);
-      return false;
+    );
+
+    const text = await response.text(); // IMPORTANT for debugging
+
+    if (!response.ok) {
+      console.error("Dropbox RAW ERROR:", text);
+      throw new Error(text);
     }
-  };
+
+    console.log("Dropbox upload success:", text);
+    return true;
+
+  } catch (err) {
+    console.error("Dropbox upload error:", err);
+    return false;
+  }
+};
 
   const handleAddApp = async () => {
     if (!appName || !appDescription || !appImage || !appFile) {
